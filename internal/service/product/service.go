@@ -1,7 +1,6 @@
 package product
 
-type Service struct {
-}
+type Service struct{}
 
 func NewService() *Service {
 	return &Service{}
