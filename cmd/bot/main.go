@@ -1,6 +1,7 @@
 package main
 
 import (
+	"deevins_bot/internal/service/product"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 	"github.com/joho/godotenv"
 	"log"
@@ -16,7 +17,7 @@ func main() {
 		log.Panic(err)
 	}
 
-	bot.Debug = true
+	//bot.Debug = true
 
 	log.Printf("Authorized on account %s", bot.Self.UserName)
 
@@ -30,16 +31,20 @@ func main() {
 		log.Panic(err)
 	}
 
+	productService := product.NewService()
+
 	for update := range updates {
 		if update.Message == nil { // If we did not get a message
 			continue
 		}
 
 		switch update.Message.Command() {
-
 		case "help":
 			helpCommand(bot, update.Message)
 
+		case "list":
+			listCommand(bot, update.Message, productService)
+			// 2:09:50
 		default:
 			defaultBehaviour(bot, update.Message)
 		}
@@ -48,7 +53,22 @@ func main() {
 
 }
 func helpCommand(bot *tgbotapi.BotAPI, inputMessage *tgbotapi.Message) {
-	msg := tgbotapi.NewMessage(inputMessage.Chat.ID, "/help - help")
+	msg := tgbotapi.NewMessage(inputMessage.Chat.ID,
+		"/help - help \n"+
+			"/list - list products",
+	)
+	bot.Send(msg)
+}
+
+func listCommand(bot *tgbotapi.BotAPI, inputMessage *tgbotapi.Message, productService *product.Service) {
+	outputMsgText := "All the products: \n\n"
+
+	products := productService.List()
+	for _, p := range *products {
+		outputMsgText += p.Title
+		outputMsgText += "\n"
+	}
+	msg := tgbotapi.NewMessage(inputMessage.Chat.ID, outputMsgText)
 	bot.Send(msg)
 }
 
