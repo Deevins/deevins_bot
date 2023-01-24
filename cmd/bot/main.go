@@ -37,20 +37,8 @@ func main() {
 	commander := commands.NewCommander(bot, productService)
 
 	for update := range updates {
-		if update.Message == nil { // If we did not get a message
-			continue
-		}
 
-		switch update.Message.Command() {
-		case "help":
-			commander.Help(update.Message)
-
-		case "list":
-			commander.List(update.Message)
-			// 2:09:50
-		default:
-			commander.Default(update.Message)
-		}
+		commander.HandleUpdate(&update)
 
 	}
 
